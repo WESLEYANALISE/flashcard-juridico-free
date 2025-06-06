@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-const DAILY_LIMIT = 30;
+const DAILY_LIMIT = 10;
 const STORAGE_KEY = 'daily-cards-study';
 
 interface DailyProgress {

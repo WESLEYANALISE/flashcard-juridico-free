@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Crown, Zap, BookOpen, BarChart3, Smartphone, Headphones, Users, Shield } from 'lucide-react';
+import { X, Crown, Zap, BookOpen, BarChart3, FileText, Users, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PremiumModalProps {
@@ -50,7 +50,7 @@ const PremiumModal = ({ isOpen, onClose, cardsStudied, dailyLimit }: PremiumModa
     },
     {
       icon: <BookOpen className="w-6 h-6 text-blue-400" />,
-      title: "+10.000 Flashcards",
+      title: "+6.000 Flashcards",
       description: "Acesso completo ao banco de questões jurídicas"
     },
     {
@@ -59,19 +59,14 @@ const PremiumModal = ({ isOpen, onClose, cardsStudied, dailyLimit }: PremiumModa
       description: "Civil, Penal, Administrativo, Tributário e mais"
     },
     {
-      icon: <Smartphone className="w-6 h-6 text-green-400" />,
-      title: "Modo Offline",
-      description: "Estude sem internet, em qualquer lugar"
+      icon: <FileText className="w-6 h-6 text-green-400" />,
+      title: "Flashcards com Exemplos Práticos",
+      description: "Conteúdo enriquecido com casos reais e aplicações"
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-orange-400" />,
       title: "Estatísticas Avançadas",
       description: "Relatórios detalhados de desempenho"
-    },
-    {
-      icon: <Headphones className="w-6 h-6 text-pink-400" />,
-      title: "IA de Revisão",
-      description: "Sistema inteligente de repetição espaçada"
     },
     {
       icon: <Users className="w-6 h-6 text-indigo-400" />,
