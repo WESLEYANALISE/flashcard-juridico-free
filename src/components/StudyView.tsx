@@ -16,6 +16,10 @@ import SessionStats from './SessionStats';
 import GeneralSummary from './GeneralSummary';
 import ErrorBoundary from './ErrorBoundary';
 import { useStudyProgress } from '@/hooks/useStudyProgress';
+import { useIsPremium } from '@/hooks/useUserProfile';
+import { useDailyLimit } from '@/hooks/useDailyLimit';
+import PremiumModal from './PremiumModal';
+import PremiumBadge from './PremiumBadge';
 
 interface StudyViewProps {
   flashcards: Flashcard[];
@@ -112,6 +116,17 @@ const StudyView = ({
   const currentCard = currentCards[currentCardIndex];
   const currentSupabaseCard = selectedFlashcards[currentCardIndex];
   const selectedCategory = categories.find(cat => cat.name === selectedArea);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  const isPremium = useIsPremium();
+  const { 
+    cardsStudied, 
+    hasReachedLimit, 
+    remainingCards, 
+    incrementCardCount, 
+    dailyLimit 
+  } = useDailyLimit();
+
   const handleAreaSelect = (areaName: string) => {
     setSelectedArea(areaName);
     setCurrentStep('themes');
@@ -146,6 +161,12 @@ const StudyView = ({
   const handleAnswer = async (correct: boolean) => {
     if (!currentCard || !selectedArea) return;
 
+    // Verificar limite apenas para usuários não premium
+    if (!isPremium && hasReachedLimit) {
+      setShowPremiumModal(true);
+      return;
+    }
+
     const newStats = {
       correct: sessionStats.correct + (correct ? 1 : 0),
       total: sessionStats.total + 1,
@@ -154,6 +175,16 @@ const StudyView = ({
       completed: false
     };
     setSessionStats(newStats);
+
+    // Incrementar contador apenas para usuários não premium
+    if (!isPremium) {
+      incrementCardCount();
+      
+      // Verificar se atingiu o limite após incrementar
+      if (cardsStudied + 1 >= dailyLimit) {
+        setShowPremiumModal(true);
+      }
+    }
 
     // Update progress in database
     try {
@@ -352,6 +383,14 @@ const StudyView = ({
                   <div className="text-white text-sm bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
                     {currentCardIndex + 1}/{currentCards.length}
                   </div>
+
+                  {/* Contador de limite para usuários não premium */}
+                  {!isPremium && (
+                    <div className="flex items-center space-x-2 text-white text-sm bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-yellow-500/30">
+                      <PremiumBadge variant="crown" size="sm" />
+                      <span>{remainingCards} restantes</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -385,6 +424,14 @@ const StudyView = ({
             </div>
           </div>
         </div>
+
+        {/* Premium Modal */}
+        <PremiumModal
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          cardsStudied={cardsStudied}
+          dailyLimit={dailyLimit}
+        />
       </ErrorBoundary>
     );
   }
@@ -402,14 +449,33 @@ const StudyView = ({
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               Selecione a área do direito que deseja estudar e escolha os temas específicos
             </p>
+            
+            {/* Indicador de limite para usuários não premium */}
+            {!isPremium && (
+              <div className="mt-6 flex items-center justify-center space-x-2 text-yellow-400">
+                <PremiumBadge variant="crown" size="md" />
+                <p className="text-lg font-semibold">
+                  {remainingCards} cards gratuitos restantes hoje
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-            {categoryStats.map((category, index) => <div key={category.id} className="animate-fade-in" style={{
-            animationDelay: `${index * 0.1}s`
-          }}>
-                <CategoryCard category={category} cardCount={category.cardCount} studiedCount={category.studiedCount} isSelected={false} onClick={() => handleAreaSelect(category.name)} />
-              </div>)}
+            {categoryStats.map((category, index) => (
+              <div key={category.id} className="animate-fade-in" style={{
+                animationDelay: `${index * 0.1}s`
+              }}>
+                <CategoryCard 
+                  category={category} 
+                  cardCount={category.cardCount} 
+                  studiedCount={category.studiedCount} 
+                  isSelected={false} 
+                  onClick={() => handleAreaSelect(category.name)}
+                  showPremiumBadge={!isPremium}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

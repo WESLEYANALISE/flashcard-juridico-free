@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -9,6 +8,7 @@ import PlaylistView from '@/components/PlaylistView';
 import SettingsView from '@/components/SettingsView';
 import AuthPage from '@/components/AuthPage';
 import { useFlashcards } from '@/hooks/useFlashcards';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { User } from '@supabase/supabase-js';
 
 const Index = () => {
@@ -17,6 +17,7 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: supabaseFlashcards = [] } = useFlashcards();
+  const { data: userProfile } = useUserProfile();
 
   useEffect(() => {
     // Get initial session
